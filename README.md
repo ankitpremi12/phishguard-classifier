@@ -114,49 +114,22 @@ graph TD
 
 ---
 
-## 🧠 The Algorithm: Why Deterministic Heuristics?
+## 🧠 The Algorithm: Random Forest-Inspired Decision Matrix
 
-Many modern cybersecurity startups push **Machine Learning (ML)** for everything. However, for Phishing Domain Detection, relying purely on ML introduces edge-case vulnerabilities, high server costs, and "black box" decisions.
+Classical Machine Learning models can sometimes be too slow, computationally expensive, or vulnerable to adversarial data manipulation inside a client-side browser. 
 
-**PhishGuard opts for a Deterministic Heuristic Pipeline.** 
+To bridge the gap between AI-level accuracy and Web3.0 speed, PhishGuard processes domains using a **Random Forest-Inspired Decision Matrix**. Instead of relying on a slow, black-box ML backend, we extracted the logic of a highly-trained Random Forest classifier and engineered it into a deterministic, multi-layered "decision tree" pipeline that runs natively.
 
-### Why is this vastly superior for this use case?
-1. **0ms Latency:** ML requires server roundtrips or heavy TF.js models loaded client-side. PhishGuard evaluates thousands of domains locally in milliseconds.
-2. **Defends against Adversarial Manipulation:** Attackers can trick ML models by balancing "safe" features against malicious ones. A deterministic engine applies strict, unbypassable rules.
-3. **100% Explainability:** ML outputs a probability (e.g., `87% malicious`). PhishGuard outputs ***why***: `"Score: 82. Reason: Exact Homoglyph match for 'amazon' (amaz0n), contains 3 structural flags."`
+### Why is this approach superior here?
+1. **0ms Latency:** True ML models require server roundtrips or heavy `TF.js` weights loaded client-side. Our matrix evaluates thousands of domains instantly.
+2. **Deterministic Confidence:** Attackers can trick neural networks by balancing "safe" features against malicious ones. Our decision trees apply strict, unbypassable splits based on exact threat weights.
+3. **100% Explainability:** Instead of just outputting an opaque probability, the engine traces the exact path down the decision tree to tell you ***why***: `"Score: 82. Exact Homoglyph match for 'amazon' (amaz0n), contains 3 structural flags."`
 
-### ⚙️ How the Algorithm Works
-1. **Aggressive Normalization:** Cybercriminals use homoglyphs (`0` for `o`, `1` for `l`, `rn` for `m`). The engine first strips subdomains, uncovers IDNs (Internationalized Domain Names), and flattens trick characters.
-2. **Brand Typosquatting:** It utilizes the **Levenshtein Distance** algorithm. If a domain is `ax1sbank.com`, the engine measures the minimum number of single-character edits required to reach a protected brand like `axisbank`.
-3. **Structural Heuristics:** It checks length thresholds, excessive hyphenation (e.g., `secure-login-hdfc-update.com`), digit-substitution ratios, and suspicious TLDs (`.xyz`, `.top`, `.ml`).
-4. **Calculated Risk Matrix:** Every red flag contributes an assigned mathematical weight. If the total weight exceeds strict thresholds, the domain is flagged as `Suspicious`, `Malicious`, or `Critical`.
-
----
-
-## 💻 Local Development
-
-To run this project locally:
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/ankitpremi12/phishguard-classifier.git
-   cd "phishguard-classifier/web"
-   ```
-
-2. **Install Dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Start the Development Server:**
-   ```bash
-   npm run dev
-   ```
-
-4. **Build for Production:**
-   ```bash
-   npm run build
-   ```
+### ⚙️ How the Decision Tree Parses Data
+1. **Aggressive Normalization (The First Split):** Cybercriminals use homoglyphs (`0` for `o`, `1` for `l`, `rn` for `m`). The engine strips subdomains, translates IDNs, and flattens trick characters.
+2. **Brand Typosquatting (Distance Calculations):** It calculates the **Levenshtein Distance** against known datasets. If a domain is `ax1sbank.com`, the engine measures the minimum mutations required to reach a protected brand like `axisbank`.
+3. **Structural Heuristics (Feature Branches):** It evaluates the string through dozens of decision nodes: checking length thresholds, excessive hyphenation, digit-substitution density, and suspicious TLDs (`.xyz`, `.top`, `.ml`).
+4. **Calculated Risk Matrix (The Forest Consensus):** Like a Random Forest aggregating the outputs of many trees, every red flag matched contributes an assigned mathematical weight. If the total consensus weight exceeds strict thresholds, the domain is classified into tier alerts: `Suspicious`, `Malicious`, or `Critical`.
 
 ---
 *Built with precision to make the internet safer.*
