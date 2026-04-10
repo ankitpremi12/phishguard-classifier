@@ -107,6 +107,25 @@ export function analyzeDomain(domainInput) {
   // ── Layer 6: Structural Heuristics (replaces ML) ──
   let heuristicScore = 0;
 
+  // ── 6a. Substring Brand Impersonation ──
+  // The domain doesn't perfectly match or typosquat a brand, but it EMBEDS the brand explicitly
+  // e.g. indianbank-account.online (contains 'indianbank')
+  const matchedBrandSubstring = targetBrands.find(b => domainName.includes(b) && domainName !== b);
+  if (matchedBrandSubstring) {
+    heuristicScore += 65; // Massive penalty for embedding a brand name natively
+    riskFactors.push(`Embedded brand name: contains "${matchedBrandSubstring}"`);
+  }
+
+  // ── 6b. Generic Banking Impersonation ──
+  // Domain is not a known brand, but it claims to be a bank AND contains suspicious words
+  // e.g. someunknownbank-login.xyz
+  if (features.isBankingDomain && domainName !== 'bank' && !whitelistCheck.isLegitimate) {
+    if (features.suspiciousWords > 0 || HIGH_RISK_TLDS.has(suffix.toLowerCase())) {
+      heuristicScore += 55;
+      riskFactors.push('Unverified banking domain with suspicious signals');
+    }
+  }
+
   // High entropy → likely random/generated
   if (features.sldEntropy > 3.5) {
     heuristicScore += 15;

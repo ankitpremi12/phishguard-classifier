@@ -80,12 +80,73 @@ export const BRAND_TLD_POLICIES = {
     brandType: 'banking',
     highRiskIfWrongTld: true,
   },
+  indianbank: {
+    officialTlds: ['in'],
+    forbiddenTlds: ['com', 'org', 'net', 'xyz', 'top', 'online'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  unionbankofindia: {
+    officialTlds: ['co.in'],
+    forbiddenTlds: ['com', 'in', 'org', 'net', 'xyz', 'icu'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  idfcfirstbank: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['in', 'org', 'net', 'xyz', 'online'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  statebankofindia: {
+    officialTlds: ['com', 'co.in'],
+    forbiddenTlds: ['org', 'net', 'xyz', 'icu'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  canarabank: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['in', 'org', 'net', 'xyz', 'icu'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  bandhanbank: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['in', 'live', 'online', 'xyz'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  rblbank: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['in', 'org', 'live', 'online'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  idbibank: {
+    officialTlds: ['in'],
+    forbiddenTlds: ['com', 'org', 'online', 'live'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  indusind: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['in', 'org', 'online', 'live'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  yesbank: {
+    officialTlds: ['in'],
+    forbiddenTlds: ['com', 'org', 'online', 'live'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
 };
 
 export const HIGH_RISK_TLDS = new Set([
   'xyz', 'top', 'click', 'pro', 'gq', 'ml', 'cf', 'ga', 'tk', 'net',
   'work', 'date', 'download', 'racing', 'stream', 'science', 'shop',
   'party', 'accountant', 'loan', 'faith', 'cricket', 'biz', 'link',
+  'online', 'icu', 'cfd', 'live', 'site', 'vip', 'pw', 'cc', 'ws', 'cam', 'sbs'
 ]);
 
 export const SUSPICIOUS_SUBDOMAINS = new Set([
