@@ -934,26 +934,46 @@ table tr:hover td { background: rgba(255,255,255,0.015); }
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
-  .hero h1 { font-size: 1.8rem; }
-  .hero p { font-size: 0.9rem; }
-  .container { padding: 0 16px; }
-  .charts-row { grid-template-columns: 1fr; }
-  .stats-strip { grid-template-columns: repeat(2, 1fr); }
-  .search-box { flex-direction: column; align-items: stretch; }
-  .search-btn { margin: 4px; }
-  .result-body { grid-template-columns: 1fr; }
+@media (max-width: 992px) {
   .details-row { grid-template-columns: repeat(2, 1fr); }
-  .header-tabs { display: none; }
-  .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
-  .upload-zone { padding: 32px 20px; }
+  .stats-strip { grid-template-columns: repeat(2, 1fr); }
+  .modal-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 48px 0 32px; }
+  .hero h1 { font-size: 2.2rem; }
+  .hero p { font-size: 0.95rem; }
+  .container { padding: 0 16px; }
+  
+  .charts-row { grid-template-columns: 1fr; }
+  .stats-strip { grid-template-columns: 1fr; }
+  .search-box { flex-direction: column; align-items: stretch; padding: 4px; }
+  .search-prefix { display: none; }
+  .search-input { padding: 16px 12px; font-size: 1rem; }
+  .search-btn { margin-top: 8px; width: 100%; padding: 14px; }
+  
+  .result-body { grid-template-columns: 1fr; text-align: center; }
+  .gauge-wrap { margin-bottom: 24px; }
+  .factors-list { text-align: left; }
+  
+  .details-row { grid-template-columns: 1fr; }
+  .header-tabs { display: none; } /* On mobile, we might want a different nav, but user said keep it simple */
+  .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+  
+  .upload-zone { padding: 32px 16px; min-height: 240px; }
   .table-controls { flex-direction: column; align-items: stretch; }
+  .table-controls input { max-width: none; }
+  
+  .modal-content { padding: 24px 16px; border-radius: 0; height: 100vh; max-height: 100vh; }
 }
 
 @media (max-width: 480px) {
-  .hero h1 { font-size: 1.5rem; }
-  .stats-strip { grid-template-columns: 1fr; }
-  .details-row { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.8rem; }
+  .modal-domain { font-size: 1.2rem; word-break: break-all; }
+  .modal-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .score-val { font-size: 2.5rem; }
+  .tab-btn { padding: 6px 10px; font-size: 0.75rem; }
 }
 
 /* ═══════════════════════════════════════════════════
