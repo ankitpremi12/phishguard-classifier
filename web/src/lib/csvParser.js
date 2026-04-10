@@ -10,10 +10,9 @@ import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 
 // ──────────────────────────────────────────────────────────────
-// Domain regex – matches bare domains, URLs, emails
+// Domain regex – matches bare domains, URLs, emails smoothly
 // ──────────────────────────────────────────────────────────────
-const DOMAIN_RE =
-  /(?:https?:\/\/|ftp:\/\/)?(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(?=[\s,;|"'\]>)<\n\r]|$)/gm;
+const DOMAIN_RE = /\b(?:https?:\/\/|ftp:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi;
 
 /**
  * Extract all domain-like strings from a raw text blob.
@@ -23,26 +22,35 @@ function extractDomainsFromBlob(rawText) {
   const domains = new Set();
   if (!rawText || typeof rawText !== 'string') return domains;
 
-  const text = rawText.replace(/[\u200B-\u200D\uFEFF]/g, ''); // strip zero-width chars
+  // Simple clean
+  const text = rawText.replace(/[\u200B-\u200D\uFEFF]/g, ' '); 
   const matches = text.match(DOMAIN_RE) || [];
 
-  for (const m of matches) {
-    const cleaned = m
-      .replace(/^https?:\/\//i, '')
-      .replace(/^ftp[s]?:\/\//i, '')
-      .replace(/^www\./i, '')
-      .split(/[/?#]/)[0]  // strip path
-      .split(':')[0]       // strip port
-      .replace(/\.+$/, '') // strip trailing dots
-      .toLowerCase()
-      .trim();
+  for (const match of matches) {
+    let domain = match.toLowerCase().trim();
+    
+    // Strip HTTP/FTP
+    domain = domain.replace(/^https?:\/\//, '').replace(/^ftp:\/\//, '');
+    
+    // Strip emails
+    if (domain.includes('@')) {
+      domain = domain.split('@')[1];
+    }
 
-    // Sanity checks
+    // Strip www.
+    domain = domain.replace(/^www\./, '');
+
+    // Strip paths, queries, ports
+    domain = domain.split('/')[0].split('?')[0].split('#')[0].split(':')[0];
+
+    // Final clean
+    const cleaned = domain.replace(/\.+$/, '').trim();
+
     if (
       cleaned.length > 3 &&
       cleaned.length < 255 &&
       cleaned.includes('.') &&
-      !/^\d+\.\d+\.\d+\.\d+$/.test(cleaned) // skip raw IPs for now
+      !/^\d+\.\d+\.\d+\.\d+$/.test(cleaned)
     ) {
       domains.add(cleaned);
     }
