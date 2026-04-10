@@ -105,13 +105,15 @@ async function extractFromPDF(file) {
   try {
     const pdfjsLib = await import('pdfjs-dist');
 
-    // Use unpkg as it correctly mirrors npm packages (cdnjs was missing the .mjs file)
-    if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+    // Use Vite's native worker loader to bypass strict browser Cross-Origin Module Worker blocking
+    if (!pdfjsLib.GlobalWorkerOptions.workerPort) {
+      const WorkerConstructor = (await import('pdfjs-dist/build/pdf.worker.mjs?worker')).default;
+      pdfjsLib.GlobalWorkerOptions.workerPort = new WorkerConstructor();
     }
 
     const buffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    // Uint8Array is crucial for modern pdfjs
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
     const pages = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {
