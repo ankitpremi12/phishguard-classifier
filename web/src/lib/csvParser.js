@@ -97,17 +97,9 @@ async function extractFromPDF(file) {
   try {
     const pdfjsLib = await import('pdfjs-dist');
 
-    // Resolve worker locally via Vite
+    // Use unpkg as it correctly mirrors npm packages (cdnjs was missing the .mjs file)
     if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-      try {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-          'pdfjs-dist/build/pdf.worker.mjs',
-          import.meta.url
-        ).toString();
-      } catch {
-        // Fallback: disable worker (slower but works everywhere)
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-      }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
     }
 
     const buffer = await file.arrayBuffer();
@@ -118,15 +110,17 @@ async function extractFromPDF(file) {
       try {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
+        // Add a space between items to ensure domains aren't merged
         const text = (content.items || []).map(item => item.str || '').join(' ');
         pages.push(text);
-      } catch {
-        // skip bad page
+      } catch (pageErr) {
+        console.warn(`Failed to parse PDF page ${i}:`, pageErr);
       }
     }
 
     return pages.join('\n');
   } catch (err) {
+    console.error('PDF JS Extraction failed:', err);
     // If pdfjs fails entirely, try reading the raw bytes as text (gets some URLs)
     const text = await file.text().catch(() => '');
     return text;
