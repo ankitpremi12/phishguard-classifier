@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { downloadCSV } from '../../lib/csvParser';
+import AnalysisDetailsModal from '../Modals/AnalysisDetailsModal';
 
 export default function ThreatTable({ results }) {
   const [filter, setFilter]   = useState('all');
@@ -7,6 +8,8 @@ export default function ThreatTable({ results }) {
   const [sortBy, setSortBy]   = useState('riskScore');
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage]       = useState(0);
+  const [selectedResult, setSelectedResult] = useState(null);
+  
   const PAGE = 25;
 
   const filtered = useMemo(() => {
@@ -50,15 +53,15 @@ export default function ThreatTable({ results }) {
 
   return (
     <div>
-      {/* Controls */}
+      {/* Search / Filter Controls Header */}
       <div className="table-controls">
         <select value={filter} onChange={e => { setFilter(e.target.value); setPage(0); }}>
-          <option value="all">All</option>
-          <option value="malicious">Malicious</option>
-          <option value="suspicious">Suspicious</option>
-          <option value="moderate_risk">Moderate</option>
+          <option value="all">All Rankings</option>
+          <option value="malicious">Malicious Only</option>
+          <option value="suspicious">Suspicious Only</option>
+          <option value="moderate_risk">Moderate Risk</option>
           <option value="low_risk">Low Risk</option>
-          <option value="legitimate">Legitimate</option>
+          <option value="legitimate">Legitimate Only</option>
         </select>
         <input
           type="text"
@@ -67,33 +70,35 @@ export default function ThreatTable({ results }) {
           onChange={e => { setSearch(e.target.value); setPage(0); }}
           style={{ flex: 1, maxWidth: 280 }}
         />
-        <span className="table-count">{filtered.length.toLocaleString()} results</span>
-        <button className="btn" onClick={exportData} style={{ marginLeft: 'auto' }}>
-          Export CSV
+        <span className="table-count text-mono">{filtered.length.toLocaleString()} detected</span>
+        <button className="btn btn-outlined" onClick={exportData} style={{ marginLeft: 'auto' }}>
+          📦 Export CSV
         </button>
       </div>
 
-      {/* Table */}
+      {/* Results Table Container */}
       <div className="table-wrap">
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
-                <th onClick={() => sortCol('domain')}>Domain{arrow('domain')}</th>
-                <th onClick={() => sortCol('classification')}>Classification{arrow('classification')}</th>
-                <th onClick={() => sortCol('riskScore')}>Risk{arrow('riskScore')}</th>
-                <th onClick={() => sortCol('confidence')}>Confidence{arrow('confidence')}</th>
-                <th>TLD</th>
+                <th onClick={() => sortCol('domain')} style={{ cursor: 'pointer' }}>Domain{arrow('domain')}</th>
+                <th onClick={() => sortCol('classification')} style={{ cursor: 'pointer' }}>Classification{arrow('classification')}</th>
+                <th onClick={() => sortCol('riskScore')} style={{ cursor: 'pointer' }}>Risk Index{arrow('riskScore')}</th>
+                <th onClick={() => sortCol('confidence')} style={{ cursor: 'pointer' }}>AI Confidence{arrow('confidence')}</th>
+                <th>Suffix</th>
                 <th>Signals</th>
               </tr>
             </thead>
             <tbody>
               {paged.map((r, i) => (
-                <tr key={i}>
-                  <td className="cell-domain">{r.domain}</td>
+                <tr key={i} onClick={() => setSelectedResult(r)} style={{ cursor: 'pointer' }}>
+                  <td className="cell-domain">
+                    <span className="domain-text">{r.domain}</span>
+                    <span className="deep-scan-hint">View Deep AI Scan →</span>
+                  </td>
                   <td>
-                    <span className={`badge ${r.classification}`}
-                      style={{ fontSize: '0.62rem', padding: '3px 8px' }}>
+                    <span className={`badge ${r.classification}`}>
                       {r.classification.replace('_', ' ')}
                     </span>
                   </td>
@@ -102,21 +107,22 @@ export default function ThreatTable({ results }) {
                       {r.riskScore}
                     </span>
                   </td>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem' }}>
+                  <td className="text-mono" style={{ fontSize: '0.72rem' }}>
                     {(r.confidence * 100).toFixed(0)}%
                   </td>
-                  <td style={{ color: 'var(--text-4)', fontSize: '0.72rem', fontFamily: 'var(--font-mono)' }}>
+                  <td className="text-secondary text-mono" style={{ fontSize: '0.72rem' }}>
                     {r.parsed?.suffix ? `.${r.parsed.suffix}` : '—'}
                   </td>
-                  <td style={{ color: 'var(--text-4)', fontSize: '0.72rem' }}>
+                  <td className="text-secondary" style={{ fontSize: '0.72rem' }}>
                     {r.riskFactors.length}
                   </td>
                 </tr>
               ))}
               {paged.length === 0 && (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-4)' }}>
-                    No results match your filter.
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '64px', color: 'var(--text-4)' }}>
+                    <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>🔍</div>
+                    No domains found matching your criteria.
                   </td>
                 </tr>
               )}
@@ -126,14 +132,36 @@ export default function ThreatTable({ results }) {
 
         {totalPages > 1 && (
           <div className="pagination">
-            <button disabled={page === 0} onClick={() => setPage(0)}>«</button>
-            <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>‹ Prev</button>
-            <span className="page-info">{page + 1} / {totalPages}</span>
-            <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next ›</button>
-            <button disabled={page >= totalPages - 1} onClick={() => setPage(totalPages - 1)}>»</button>
+            <button className="btn-icon" disabled={page === 0} onClick={() => setPage(0)}>«</button>
+            <button className="btn-p" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
+            <span className="page-info">Page {page + 1} of {totalPages}</span>
+            <button className="btn-p" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next</button>
+            <button className="btn-icon" disabled={page >= totalPages - 1} onClick={() => setPage(totalPages - 1)}>»</button>
           </div>
         )}
       </div>
+
+      {/* Deep Scan Modal */}
+      {selectedResult && (
+        <AnalysisDetailsModal 
+          result={selectedResult} 
+          onClose={() => setSelectedResult(null)} 
+        />
+      )}
+
+      <style jsx>{`
+        .domain-text { display: block; }
+        .deep-scan-hint { 
+          font-size: 0.6rem; color: var(--accent); opacity: 0; transform: translateX(-5px); 
+          transition: all 0.2s; display: block;
+        }
+        tr:hover .deep-scan-hint { opacity: 1; transform: translateX(0); }
+        .text-mono { font-family: var(--font-mono); }
+        .text-secondary { color: var(--text-4); }
+        .table-wrap { border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.02); }
+        .btn-outlined { background: none; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; }
+        .btn-outlined:hover { background: rgba(255,255,255,0.05); }
+      `}</style>
     </div>
   );
 }

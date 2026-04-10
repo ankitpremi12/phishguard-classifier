@@ -51,36 +51,45 @@ export default function BulkAnalyzer() {
     setErrorMsg(null);
 
     try {
-      setProgressMsg('Reading file…');
       const parsed = await parseFile(file);
-
-      // Use the pre-extracted domain list from the new smart parser
       const list = parsed.domainList || parsed.rows?.map(r => r.domain).filter(Boolean) || [];
 
-      setProgress(30);
-      setProgressMsg(`Found ${list.length.toLocaleString()} unique domains — analyzing…`);
-
       if (list.length === 0) {
-        throw new Error('No domains found in this file. Make sure it contains domain names, URLs, or email addresses.');
+        throw new Error('No domains found in this file.');
       }
 
-      /* Batch with UI yields so the progress bar actually updates */
-      const BATCH = 150;
-      const allResults = [];
-      for (let i = 0; i < list.length; i += BATCH) {
-        const batch = list.slice(i, i + BATCH);
-        allResults.push(...batch.map(d => analyzeDomain(d)));
-        setProgress(30 + Math.floor((i / list.length) * 65));
-        setProgressMsg(`Analyzed ${Math.min(i + BATCH, list.length).toLocaleString()} / ${list.length.toLocaleString()} domains…`);
-        await new Promise(r => setTimeout(r, 0));
-      }
+      // Initialize World-Class Web Worker for high-performance scale
+      const worker = new Worker(
+        new URL('../../lib/engine/classifier.worker.js', import.meta.url),
+        { type: 'module' }
+      );
 
-      setProgress(100);
-      setResults(allResults);
+      worker.onmessage = (e) => {
+        const { type, progress, analyzed, total, results: finalResults } = e.data;
+
+        if (type === 'PROGRESS') {
+          setProgress(30 + Math.floor(progress * 0.7));
+          setProgressMsg(`Analyzed ${analyzed.toLocaleString()} / ${total.toLocaleString()} domains…`);
+        } else if (type === 'COMPLETE') {
+          setResults(finalResults);
+          setProcessing(false);
+          worker.terminate();
+        }
+      };
+
+      worker.onerror = (err) => {
+        console.error('Worker Error:', err);
+        setErrorMsg('High-speed processing engine failed. Please try again.');
+        setProcessing(false);
+        worker.terminate();
+      };
+
+      // Kick off analysis
+      worker.postMessage({ type: 'START_ANALYSIS', domains: list });
+
     } catch (err) {
       console.error(err);
       setErrorMsg(err.message || 'Unknown parsing error occurred');
-    } finally {
       setProcessing(false);
     }
   }, []);
