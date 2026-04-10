@@ -30,6 +30,7 @@ export default function BulkAnalyzer() {
   const [progressMsg, setProgressMsg] = useState('');
   const [fileName,    setFileName]    = useState('');
   const [dragOver,    setDragOver]    = useState(false);
+  const [errorMsg,    setErrorMsg]    = useState(null);
   const fileRef = useRef();
 
   /* ── Load sample data ── */
@@ -48,6 +49,7 @@ export default function BulkAnalyzer() {
     setResults(null);
     setIsSample(false);
     setFileName(file.name);
+    setErrorMsg(null);
 
     try {
       const parsed = await parseFile(file);
@@ -84,7 +86,7 @@ export default function BulkAnalyzer() {
       setResults(allResults);
     } catch (err) {
       console.error(err);
-      setProgressMsg(`Error: ${err.message}`);
+      setErrorMsg(err.message || 'Unknown parsing error occurred');
     } finally {
       setProcessing(false);
     }
@@ -107,6 +109,7 @@ export default function BulkAnalyzer() {
     setIsSample(false);
     setFileName('');
     setProgress(0);
+    setErrorMsg(null);
   };
 
   /* ─────────── UPLOAD STATE ─────────── */
@@ -146,6 +149,17 @@ export default function BulkAnalyzer() {
               style={{ display: 'none' }}
             />
           </div>
+
+          {/* Error Banner */}
+          {errorMsg && (
+            <div className="alert-banner danger" style={{ maxWidth: 560, margin: '24px auto 0' }}>
+              <span className="alert-icon">⚠</span>
+              <div>
+                <div className="alert-title">Processing Failed</div>
+                <div className="alert-desc">{errorMsg}</div>
+              </div>
+            </div>
+          )}
 
           {/* Sample option */}
           <div style={{ textAlign: 'center', marginTop: 24 }}>

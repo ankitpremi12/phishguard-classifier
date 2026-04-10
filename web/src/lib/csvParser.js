@@ -10,7 +10,18 @@ import * as XLSX from 'xlsx';
  * Returns { headers: string[], rows: object[], format: string }
  */
 export async function parseFile(file) {
-  const ext = file.name.split('.').pop().toLowerCase();
+  const parts = file.name.split('.');
+  let ext = parts.length > 1 ? parts.pop().toLowerCase() : '';
+  const type = file.type || '';
+
+  // Fallback to MIME type if extension is missing/weird
+  if (!ext || ext.length > 5) {
+    if (type.includes('csv')) ext = 'csv';
+    else if (type.includes('spreadsheet') || type.includes('excel')) ext = 'xlsx';
+    else if (type.includes('pdf')) ext = 'pdf';
+    else if (type.includes('word') || type.includes('document')) ext = 'docx';
+    else if (type.includes('text')) ext = 'txt';
+  }
 
   switch (ext) {
     case 'csv':
@@ -27,7 +38,7 @@ export async function parseFile(file) {
     case 'txt':
       return parseTxtFile(file);
     default:
-      throw new Error(`Unsupported file format: .${ext}. Supported: CSV, Excel, PDF, DOCX, TXT`);
+      throw new Error(`Unsupported file format: "${file.name}" (detected type: ${type || 'unknown'}). Supported formats are CSV, Excel, PDF, DOCX, and TXT.`);
   }
 }
 
