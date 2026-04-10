@@ -1223,6 +1223,50 @@ table tr:hover td { background: rgba(255,255,255,0.015); }
   font-size: 1.4rem; cursor: pointer; transition: all 0.2s;
 }
 .modal-close:hover { background: var(--bg-4); color: var(--text-1); }
+/* ── Live Infrastructure Panel ── */
+.infra-panel { 
+  padding: 24px; 
+  border-top: 1px solid var(--border); 
+  background: rgba(255,255,255,0.015); 
+}
+.infra-grid { 
+  display: grid; 
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 16px; 
+  margin-top: 12px; 
+}
+.infra-item .label { 
+  font-size: 0.62rem; 
+  color: var(--text-4); 
+  text-transform: uppercase; 
+  letter-spacing: 0.05em; 
+  margin-bottom: 4px; 
+}
+.infra-item .value { 
+  font-size: 0.85rem; 
+  color: var(--text-2); 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+}
+.pulse-dot.online { background: var(--safe) !important; box-shadow: 0 0 8px var(--safe); }
+.pulse-dot.offline { background: var(--danger) !important; }
+.pulse-dot { 
+  width: 8px; 
+  height: 8px; 
+  border-radius: 50%; 
+  display: inline-block; 
+  background: var(--text-4); 
+  animation: miniPulse 2s infinite;
+}
+@keyframes miniPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+@media (max-width: 480px) {
+  .infra-grid { grid-template-columns: 1fr; }
+}
 
 /* Table Enhancements */
 .deep-scan-hint { 

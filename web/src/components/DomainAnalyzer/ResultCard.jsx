@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import RiskGauge from './RiskGauge';
 import DomainBreakdown from './DomainBreakdown';
 
