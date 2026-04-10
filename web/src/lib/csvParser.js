@@ -77,10 +77,16 @@ async function parseExcelFile(file) {
 }
 
 async function parsePDFFile(file) {
-  // Lazy-load pdfjs-dist — only pulled in when a PDF is actually uploaded
-  const pdfjsLib = await import(/* @vite-ignore */ 'pdfjs-dist');
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+  // Lazy-load pdfjs-dist
+  const pdfjsLib = await import('pdfjs-dist');
+  
+  // Use Vite's URL handling to resolve the worker locally instead of relying on CDN
+  if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.mjs',
+      import.meta.url
+    ).toString();
+  }
 
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;

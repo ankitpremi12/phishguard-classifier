@@ -102,6 +102,7 @@ export default function BulkAnalyzer() {
   const handleChange = e => {
     const f = e.target.files[0];
     if (f) processFile(f);
+    e.target.value = '';
   };
 
   const reset = () => {
