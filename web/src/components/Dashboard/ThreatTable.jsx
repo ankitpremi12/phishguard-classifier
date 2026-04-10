@@ -148,20 +148,6 @@ export default function ThreatTable({ results }) {
           onClose={() => setSelectedResult(null)} 
         />
       )}
-
-      <style jsx>{`
-        .domain-text { display: block; }
-        .deep-scan-hint { 
-          font-size: 0.6rem; color: var(--accent); opacity: 0; transform: translateX(-5px); 
-          transition: all 0.2s; display: block;
-        }
-        tr:hover .deep-scan-hint { opacity: 1; transform: translateX(0); }
-        .text-mono { font-family: var(--font-mono); }
-        .text-secondary { color: var(--text-4); }
-        .table-wrap { border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.02); }
-        .btn-outlined { background: none; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; }
-        .btn-outlined:hover { background: rgba(255,255,255,0.05); }
-      `}</style>
     </div>
   );
 }

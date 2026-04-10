@@ -135,62 +135,6 @@ export default function AnalysisDetailsModal({ result, onClose }) {
           </section>
         </div>
       </div>
-
-      <style jsx>{`
-        .modal-overlay {
-          position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-          display: flex; align-items: center; justify-content: center; z-index: 10000;
-          padding: 20px;
-        }
-        .modal-content {
-          width: 100%; max-width: 800px;
-          background: #111; border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 20px; position: relative; padding: 40px;
-          max-height: 90vh; overflow-y: auto;
-        }
-        .modal-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
-        .modal-domain { font: 600 1.8rem var(--font-mono); color: var(--text-1); }
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .modal-section { 
-          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-          padding: 24px; border-radius: 12px;
-        }
-        .full-width { grid-column: 1 / -1; }
-        .section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-4); margin-bottom: 20px; }
-        .score-ring { text-align: center; margin-bottom: 16px; }
-        .score-val { font-size: 3rem; font-weight: 700; }
-        .score-label { font-size: 0.7rem; color: var(--text-4); }
-        .risk-factors { list-style: none; padding: 0; margin: 0; }
-        .risk-factor { 
-          font-size: 0.85rem; color: var(--text-2); display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
-        }
-        .factor-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; opacity: 0.5; }
-        .risk-factor.intel .factor-dot { background: var(--danger); }
-        
-        /* SHAP Bars */
-        .shap-container { padding: 12px 0; }
-        .shap-row { display: flex; align-items: center; gap: 12px; height: 24px; margin-bottom: 8px; }
-        .shap-label { width: 80px; font-size: 0.75rem; color: var(--text-3); }
-        .shap-bar-track { flex: 1; height: 10px; background: rgba(255,255,255,0.05); position: relative; }
-        .shap-bar { position: absolute; top: 0; height: 100%; }
-        .shap-bar.mal { background: var(--danger); }
-        .shap-bar.safe { background: var(--safe); }
-        .shap-val { width: 40px; font-size: 0.7rem; font-family: var(--font-mono); color: var(--text-4); text-align: right; }
-        .shap-axis { display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--text-4); margin-top: 8px; }
-
-        .modal-close {
-          position: absolute; top: 20px; right: 24px;
-          background: none; border: none; color: var(--text-4); font-size: 2rem; cursor: pointer;
-        }
-        .ml-header { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 0.9rem; }
-        .ml-engine { color: var(--accent); font-weight: 600; }
-        .ml-conf { color: var(--text-2); }
-
-        .skeleton-loader { height: 100px; background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 8px; }
-        .skeleton-loader.large { height: 200px; }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-      `}</style>
     </div>
   );
 }
