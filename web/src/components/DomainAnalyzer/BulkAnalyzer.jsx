@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
 import { parseFile } from '../../lib/csvParser';
-import { extractDomainsFromText, detectDomainColumn } from '../../lib/engine/domainExtractor';
 import { analyzeDomain } from '../../lib/engine/riskScorer';
 import { getSampleResults } from '../../lib/sampleData';
 import StatsOverview from '../Dashboard/StatsOverview';
@@ -52,55 +51,27 @@ export default function BulkAnalyzer() {
     setErrorMsg(null);
 
     try {
+      setProgressMsg('Reading file…');
       const parsed = await parseFile(file);
 
-      // Guard: ensure rows and headers are always arrays
-      const rows    = Array.isArray(parsed?.rows)    ? parsed.rows    : [];
-      const headers = Array.isArray(parsed?.headers) ? parsed.headers : [];
-      const totalRows = parsed?.totalRows ?? rows.length;
+      // Use the pre-extracted domain list from the new smart parser
+      const list = parsed.domainList || parsed.rows?.map(r => r.domain).filter(Boolean) || [];
 
-      setProgress(15);
-      setProgressMsg(`Parsed ${totalRows.toLocaleString()} rows — detecting domain column…`);
-
-      const domainCol = detectDomainColumn(headers);
-      setProgressMsg(domainCol
-        ? `Found column "${domainCol}" — extracting domains…`
-        : 'No header detected — scanning all cells for domains…'
-      );
-      setProgress(25);
-
-      const domains = new Set();
-      for (const row of rows) {
-        // row might be string (txt/pdf line) or object (csv/xlsx)
-        let cell;
-        if (typeof row === 'string') {
-          cell = row;
-        } else if (row && typeof row === 'object') {
-          cell = (domainCol && row[domainCol]) ? String(row[domainCol]) : Object.values(row).join(' ');
-        } else {
-          cell = String(row ?? '');
-        }
-        const extracted = extractDomainsFromText(cell);
-        extracted.forEach(d => domains.add(d));
-      }
-
-      const list = Array.from(domains);
+      setProgress(30);
+      setProgressMsg(`Found ${list.length.toLocaleString()} unique domains — analyzing…`);
 
       if (list.length === 0) {
         throw new Error('No domains found in this file. Make sure it contains domain names, URLs, or email addresses.');
       }
 
-      setProgress(40);
-      setProgressMsg(`Analyzing ${list.length.toLocaleString()} unique domains…`);
-
-      /* Batch with UI yields */
+      /* Batch with UI yields so the progress bar actually updates */
       const BATCH = 150;
       const allResults = [];
       for (let i = 0; i < list.length; i += BATCH) {
         const batch = list.slice(i, i + BATCH);
         allResults.push(...batch.map(d => analyzeDomain(d)));
-        setProgress(40 + Math.floor((i / list.length) * 55));
-        setProgressMsg(`Analyzed ${Math.min(i + BATCH, list.length).toLocaleString()} / ${list.length.toLocaleString()}…`);
+        setProgress(30 + Math.floor((i / list.length) * 65));
+        setProgressMsg(`Analyzed ${Math.min(i + BATCH, list.length).toLocaleString()} / ${list.length.toLocaleString()} domains…`);
         await new Promise(r => setTimeout(r, 0));
       }
 
