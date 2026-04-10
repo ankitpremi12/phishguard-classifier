@@ -127,6 +127,7 @@ export function parseDomain(domain) {
  * Auto-detect domain column from CSV headers.
  */
 export function detectDomainColumn(headers) {
+  if (!Array.isArray(headers) || headers.length === 0) return null;
   const domainKeywords = ['domain', 'url', 'site', 'host', 'address', 'website', 'link'];
   
   for (const header of headers) {

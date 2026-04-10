@@ -53,21 +53,43 @@ export default function BulkAnalyzer() {
 
     try {
       const parsed = await parseFile(file);
-      setProgress(15);
-      setProgressMsg(`Parsed ${parsed.totalRows.toLocaleString()} rows — detecting domain column…`);
 
-      const domainCol = detectDomainColumn(parsed.headers);
-      setProgressMsg(`Found column "${domainCol}" — extracting domains…`);
+      // Guard: ensure rows and headers are always arrays
+      const rows    = Array.isArray(parsed?.rows)    ? parsed.rows    : [];
+      const headers = Array.isArray(parsed?.headers) ? parsed.headers : [];
+      const totalRows = parsed?.totalRows ?? rows.length;
+
+      setProgress(15);
+      setProgressMsg(`Parsed ${totalRows.toLocaleString()} rows — detecting domain column…`);
+
+      const domainCol = detectDomainColumn(headers);
+      setProgressMsg(domainCol
+        ? `Found column "${domainCol}" — extracting domains…`
+        : 'No header detected — scanning all cells for domains…'
+      );
       setProgress(25);
 
       const domains = new Set();
-      for (const row of parsed.rows) {
-        const cell = row[domainCol] || Object.values(row).join(' ');
-        const extracted = extractDomainsFromText(String(cell));
+      for (const row of rows) {
+        // row might be string (txt/pdf line) or object (csv/xlsx)
+        let cell;
+        if (typeof row === 'string') {
+          cell = row;
+        } else if (row && typeof row === 'object') {
+          cell = (domainCol && row[domainCol]) ? String(row[domainCol]) : Object.values(row).join(' ');
+        } else {
+          cell = String(row ?? '');
+        }
+        const extracted = extractDomainsFromText(cell);
         extracted.forEach(d => domains.add(d));
       }
 
       const list = Array.from(domains);
+
+      if (list.length === 0) {
+        throw new Error('No domains found in this file. Make sure it contains domain names, URLs, or email addresses.');
+      }
+
       setProgress(40);
       setProgressMsg(`Analyzing ${list.length.toLocaleString()} unique domains…`);
 
