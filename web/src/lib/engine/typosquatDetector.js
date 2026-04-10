@@ -3,6 +3,7 @@
 
 import { normalizeDomainAggressive } from './homoglyphs.js';
 import { BRAND_TLD_POLICIES } from './brandPolicies.js';
+import { calculateBlendedSimilarity } from './nlpTools.js';
 
 // Keyboard adjacency map for detecting fat-finger typos
 const KEYBOARD_LAYOUT = {
@@ -101,18 +102,13 @@ export function keyboardSimilarity(s1, s2) {
 
 /**
  * Calculate enhanced multi-algorithm similarity between two domains.
+ * Uses advanced NLP Phonetic (Soundex) + Damerau-Levenshtein transposition algorithms.
  */
 export function calculateEnhancedSimilarity(domain1, domain2) {
-  // Basic string similarity (SequenceMatcher equivalent)
-  const basicSimilarity = (() => {
-    const longer = domain1.length >= domain2.length ? domain1 : domain2;
-    const shorter = domain1.length >= domain2.length ? domain2 : domain1;
-    if (longer.length === 0) return 1.0;
-    const editDist = levenshteinDistance(longer, shorter);
-    return (longer.length - editDist) / longer.length;
-  })();
+  // NLP Phonetic + Transposition calculation
+  const blendedNLPScore = calculateBlendedSimilarity(domain1, domain2);
 
-  // Levenshtein-based similarity
+  // Levenshtein-based baseline similarity
   const levDist = levenshteinDistance(domain1, domain2);
   const maxLen = Math.max(domain1.length, domain2.length);
   const levSimilarity = maxLen > 0 ? 1 - levDist / maxLen : 0;
@@ -123,8 +119,8 @@ export function calculateEnhancedSimilarity(domain1, domain2) {
   // Keyboard adjacency
   const kbSim = keyboardSimilarity(domain1, domain2);
 
-  // Weighted combination
-  return basicSimilarity * 0.2 + levSimilarity * 0.3 + jaroSim * 0.2 + kbSim * 0.3;
+  // Weighted combination: 40% Phonetic NLP, 30% Levenshtein, 15% Jaro, 15% Keyboard Adjacency
+  return blendedNLPScore * 0.4 + levSimilarity * 0.3 + jaroSim * 0.15 + kbSim * 0.15;
 }
 
 /**
