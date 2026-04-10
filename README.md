@@ -20,97 +20,116 @@ Unlike traditional platforms that rely on slow, black-box Machine Learning model
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Enterprise System Architecture
 
 ```mermaid
 graph TD
     %% User Inputs
-    subgraph UI ["🌐 User Interface (React)"]
-        UI1[Single Domain Input]
-        UI2[Bulk File Upload Area]
+    subgraph Frontend ["🎨 Frontend UI (React + Tailwind CSS)"]
+        UI[Web Interface]
+        BULK[Bulk File Parser]
     end
 
-    %% Universal Parser Pipeline
-    subgraph Parser ["📂 Universal Parser Pipeline"]
+    %% Threat Intel
+    subgraph Intel ["🔍 Live Threat Intelligence"]
+        VT[VirusTotal API]
+        PT[PhishTank API]
+        OP[OpenPhish API]
+        DNS[DNS / WHOIS Analysis]
+    end
+
+    %% Python Backend
+    subgraph Backend ["⚙️ FastAPI Python Backend (NumPy, Pandas)"]
         direction TB
-        F1{Detect Format}
-        P_TXT[TXT Extractor]
-        P_CSV[CSV Extractor<br/>PapaParse]
-        P_XLS[XLSX Extractor<br/>SheetJS]
-        P_PDF[PDF Extractor<br/>Vite Native Worker]
-        P_DOC[DOCX Extractor<br/>Mammoth]
         
-        REGEX[O N Regex Pipeline<br/>Domain Isolation]
-    end
+        %% Feature Engineering
+        subgraph Features ["🧪 Feature Engineering"]
+            NGRAM[Character N-grams]
+            ENT[Shannon Entropy]
+            TLD[TLD & Structure Analysis]
+        end
 
-    %% The Engine
-    subgraph Engine ["🧠 Deterministic Heuristic Engine"]
-        direction TB
-        NORM[Aggressive Normalizer<br/>Homoglyph & IDN Translation]
-        WL[Whitelist Bypass]
-        TYPO[Levenshtein Distance<br/>Brand Typosquatting]
-        HEUR[Structural Heuristics<br/>Dashes, Digits, Lengths]
-        SCORE[Risk Scorer<br/>Matrix Evaluator]
-    end
+        %% Core Algorithms
+        subgraph CoreAlgo ["🧠 Core Algorithms"]
+            LEV[Levenshtein & Damerau-Levenshtein]
+            PHON[Soundex & Metaphone]
+            CONF[Unicode Confusable Mapping]
+        end
 
-    %% Output
-    subgraph Output ["📊 Analytics Dashboard"]
-        DASH1[Risk Distribution Chart]
-        DASH2[Threat Intel Table]
-        CSV[CSV Export]
+        %% Deep Learning & ML
+        subgraph ML ["🤖 Machine Learning & Deep Learning"]
+            RF[Random Forest]
+            XGB[XGBoost]
+            LSTM[LSTM / GRU Models]
+            BERT[BERT Fine-Tuning]
+            GNN[Graph Neural Networks]
+        end
+
+        %% Explainability
+        subgraph XAI ["📊 Explainability (XAI)"]
+            SHAP[SHAP Values]
+            LIME[LIME Interpretability]
+        end
+        
+        Features --> CoreAlgo
+        CoreAlgo --> ML
+        ML --> XAI
     end
 
     %% Connections
-    UI1 --> NORM
-    UI2 --> F1
-    
-    F1 -->|text/plain| P_TXT
-    F1 -->|text/csv| P_CSV
-    F1 -->|application/vnd...| P_XLS
-    F1 -->|application/pdf| P_PDF
-    F1 -->|application/msword| P_DOC
-    
-    P_TXT --> REGEX
-    P_CSV --> REGEX
-    P_XLS --> REGEX
-    P_PDF --> REGEX
-    P_DOC --> REGEX
-    
-    REGEX --> NORM
-    
-    NORM --> WL
-    WL --> TYPO
-    TYPO --> HEUR
-    HEUR --> SCORE
-    
-    SCORE --> DASH1
-    SCORE --> DASH2
-    SCORE --> CSV
+    UI --> Backend
+    BULK --> Backend
+    Backend <--> Intel
+    XAI --> UI
 
     classDef engine fill:#1e1e2f,stroke:#646CFF,stroke-width:2px,color:#fff
     classDef ui fill:#121212,stroke:#00D1B2,stroke-width:2px,color:#fff
-    classDef parser fill:#1a1a24,stroke:#F7DF1E,stroke-width:2px,color:#fff
+    classDef intel fill:#2b0f4c,stroke:#B19CD9,stroke-width:2px,color:#fff
     
-    class Engine engine
-    class Output,UI ui
-    class Parser parser
+    class Backend engine
+    class Frontend ui
+    class Intel intel
 ```
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Advanced Technology Stack
 
-### Frontend & Core
-- **[React 19](https://react.dev/):** UI component orchestration.
-- **[Vite](https://vitejs.dev/):** Lightning-fast HMR and optimized production bundling.
-- **[Chart.js / React-Chartjs-2](https://react-chartjs-2.js.org/):** Data visualization for threat analytics.
+Our infrastructure leverages the absolute bleeding-edge in deep learning, natural language processing, and cybersecurity threat intelligence.
 
-### File Parsing Sub-System
-*These libraries are lazily loaded (dynamically imported) using Vite to keep the initial page load under 100kb.*
-- **[pdfjs-dist](https://mozilla.github.io/pdf.js/):** Natively bundled via a Vite `?worker` module to completely bypass strict browser cross-origin policy blocks. Extracts text data from binary PDFs.
-- **[XLSX (SheetJS)](https://sheetjs.com/):** For multi-sheet Excel spreadsheet extraction.
-- **[PapaParse](https://www.papaparse.com/):** High-speed CSV parsing.
-- **[Mammoth](https://github.com/mwilliamson/mammoth.js/):** Converts `.docx` files to raw strings safely.
+### 🧠 Core Algorithms (Detection)
+- **Levenshtein & Damerau-Levenshtein Distance:** For exact mutation measurements.
+- **Soundex & Metaphone:** Phonetic algorithm matching to catch phonetically identical phonies (`aykzis` vs `axis`).
+- **Unicode Confusable Mapping:** Advanced homoglyph and IDN spoofing detection.
+- **Shannon Entropy:** Mathematical randomness modeling.
+
+### 🤖 Machine Learning / Deep Learning
+- **Random Forest & XGBoost:** High-speed ensemble classifiers for baseline inference.
+- **LSTM / GRU:** Sequence-based neural networks modeling the chronological structure of malicious URLs.
+- **BERT (Fine-tuning):** Transformer-based contextual analysis of domain semantics.
+- **Graph Neural Networks (GNN):** [🔥 Advanced] Mapping domain-to-IP neighborhood relationships.
+
+### 🧪 Feature Engineering
+- **Character N-Grams:** Segmenting URLs into overlapping sequences to catch hidden malicious patterns.
+- **Structural Analysis:** Domain length, digit ratios, and deeply nested subdomains.
+- **TLD Analysis:** Evaluating the reputation score of high-risk top-level domains.
+
+### 🔍 Threat Intelligence APIs
+- **VirusTotal**
+- **PhishTank**
+- **OpenPhish**
+
+### ⚙️ Backend & Engine
+- **FastAPI:** Ultra-fast, async Python web framework handling inference scaling.
+- **Python Data Stack:** `NumPy`, `Pandas`, `Scikit-learn` for tensor operations & data manipulation.
+- **DNS / WHOIS Analysis:** Live querying for domain age and active resolution.
+
+### 🎨 Frontend
+- **React.js:** Lightning-fast virtual DOM orchestration.
+- **Tailwind CSS:** Fully responsive, premium glassmorphism styling.
+
+### 📊 Explainability (XAI)
+- **SHAP & LIME:** Zero 'Black Box' decisions. Our engine outputs exactly *which* characters and features contributed to the threat score, providing human-readable attack blueprints.
 
 ---
 
