@@ -106,7 +106,31 @@ function countPhishingIntent(fullDomain) {
 }
 
 /**
- * Main analysis function — v2.0
+ * Detect if input is an IP address instead of a domain name (major red flag).
+ */
+function isIPAddress(input) {
+  return /^(\d{1,3}\.){3}\d{1,3}(:\d+)?$/.test(input) || /^\[?[0-9a-fA-F:]+\]?$/.test(input);
+}
+
+/**
+ * Detect @ symbol in URL (browser trick to hide real destination).
+ */
+function hasAtSymbol(input) {
+  return input.includes('@');
+}
+
+/**
+ * Common, well-known TLDs that normal sites use.
+ */
+const COMMON_TLDS = new Set([
+  'com', 'org', 'net', 'edu', 'gov', 'mil', 'int',
+  'co', 'io', 'me', 'us', 'uk', 'in', 'de', 'fr', 'jp', 'au', 'ca', 'br',
+  'co.in', 'co.uk', 'co.jp', 'com.au', 'com.br', 'org.in', 'gov.in', 'ac.in',
+  'info', 'biz', 'app', 'dev', 'ai', 'tech',
+]);
+
+/**
+ * Main analysis function — v3.0
  */
 export function analyzeDomain(domainInput) {
   const parsed = parseDomain(domainInput);
@@ -131,6 +155,21 @@ export function analyzeDomain(domainInput) {
       explanation: 'Domain is in the verified whitelist database.',
       features, brandCheck: null, typosquatInfo: null, whitelistMatch: true,
     };
+  }
+
+  // ════════════════════════════════════════════════════════
+  // LAYER 1.5: INSTANT RED FLAGS (IP address, @ symbol)
+  // ════════════════════════════════════════════════════════
+  if (isIPAddress(domainInput)) {
+    riskScore = Math.max(riskScore, 90);
+    riskFactors.push('IP address used instead of domain name');
+    explanation = 'Using an IP address instead of a domain name is a major phishing indicator.';
+  }
+
+  if (hasAtSymbol(domainInput)) {
+    riskScore = Math.max(riskScore, 92);
+    riskFactors.push('@ symbol detected — browser redirect trick');
+    explanation = 'The @ symbol in a URL tricks browsers into ignoring everything before it.';
   }
 
   // ════════════════════════════════════════════════════════
@@ -341,22 +380,71 @@ export function analyzeDomain(domainInput) {
   }
 
   // ════════════════════════════════════════════════════════
-  // LAYER 10: FINAL SCORE AGGREGATION
+  // LAYER 10: URL STRUCTURE ANALYSIS (NEW)
   // ════════════════════════════════════════════════════════
-  // CRITICAL FIX: use Math.max so Layer 2-8 scores are NEVER overwritten
+  
+  // URL Length — phishing URLs tend to be longer
+  if (full.length > 30) {
+    heuristicScore += 5;
+    riskFactors.push(`Long URL: ${full.length} characters`);
+  }
+  if (full.length > 50) {
+    heuristicScore += 10;
+  }
+
+  // Number of dots — too many indicates subdomain spoofing
+  const dotCount = (full.match(/\./g) || []).length;
+  if (dotCount > 3) {
+    heuristicScore += 15;
+    riskFactors.push(`Excessive dots: ${dotCount} (possible subdomain spoof)`);
+  } else if (dotCount > 2) {
+    heuristicScore += 5;
+  }
+
+  // Exotic / rare TLD — not a common, well-known TLD
+  if (!COMMON_TLDS.has(suffix.toLowerCase())) {
+    heuristicScore += 10;
+    riskFactors.push(`Uncommon TLD: .${suffix}`);
+  }
+
+  // ════════════════════════════════════════════════════════
+  // LAYER 11: BASELINE UNVERIFIED DOMAIN PENALTY
+  // ════════════════════════════════════════════════════════
+  // THIS IS THE CRITICAL FIX:
+  // Any domain NOT in the whitelist is UNVERIFIED. Unknown ≠ Safe.
+  // We add a baseline risk so unknown domains are NEVER "legitimate".
+  const isUnverified = !whitelistCheck.isLegitimate;
+  if (isUnverified && heuristicScore === 0 && riskScore === 0) {
+    // Domain triggered ZERO detection rules — it's completely unknown
+    heuristicScore = 25;
+    riskFactors.push('Unverified domain — not in any known database');
+    explanation = 'This domain is not in our verified database. Unknown domains carry inherent risk.';
+  } else if (isUnverified && riskScore < 20 && heuristicScore < 20) {
+    // Domain triggered minimal rules — still unverified
+    heuristicScore = Math.max(heuristicScore, 20);
+    if (!riskFactors.some(f => f.includes('Unverified'))) {
+      riskFactors.push('Unverified domain');
+    }
+  }
+
+  // ════════════════════════════════════════════════════════
+  // LAYER 12: FINAL SCORE AGGREGATION
+  // ════════════════════════════════════════════════════════
   riskScore = Math.max(riskScore, heuristicScore);
 
-  // Deterministic jitter for unique scores (±1.5 points, never changes classification)
+  // Deterministic jitter for unique scores (±1.5 points)
   const hash = full.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
-  const jitter = ((Math.abs(hash) % 30) - 15) / 10; // -1.5 to +1.5
+  const jitter = ((Math.abs(hash) % 30) - 15) / 10;
   riskScore = Math.min(99, Math.max(0, riskScore + jitter));
 
-  // Round to 1 decimal for clean display
+  // Round to 1 decimal
   riskScore = Math.round(riskScore * 10) / 10;
 
   // ════════════════════════════════════════════════════════
-  // LAYER 11: CLASSIFICATION
+  // LAYER 13: CLASSIFICATION
   // ════════════════════════════════════════════════════════
+  // CRITICAL RULE: "legitimate" is ONLY for whitelisted domains.
+  // Unknown domains are NEVER classified as legitimate.
   let classification;
   let confidence;
 
@@ -369,12 +457,20 @@ export function analyzeDomain(domainInput) {
   } else if (riskScore >= 40) {
     classification = 'moderate_risk';
     confidence = 0.70 + (riskScore / 1000);
-  } else if (riskScore >= 20) {
+  } else if (riskScore >= 15) {
     classification = 'low_risk';
     confidence = 0.65;
-  } else {
+  } else if (whitelistCheck.isLegitimate) {
+    // Only whitelisted domains can ever be "legitimate"
     classification = 'legitimate';
-    confidence = 0.85 - (riskScore / 200);
+    confidence = 0.85;
+  } else {
+    // Unknown domain with very low score — still not "legitimate"
+    classification = 'low_risk';
+    confidence = 0.55;
+    if (!riskFactors.some(f => f.includes('Unverified'))) {
+      riskFactors.push('Unverified domain');
+    }
   }
 
   return {
