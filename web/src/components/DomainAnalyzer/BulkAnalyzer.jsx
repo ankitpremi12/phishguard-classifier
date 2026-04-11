@@ -132,16 +132,27 @@ export default function BulkAnalyzer() {
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
             onClick={() => fileRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            aria-label="Upload domain list"
           >
             <div className="upload-icon-wrap"><UploadIcon /></div>
             <div className="upload-title">
-              <span>Click to upload</span> or drag and drop
+              <strong>Click to upload</strong> or drag and drop
             </div>
             <div className="upload-hint">
-              Domains can be in any column — we auto-detect them.<br />
-              Works with plain domains, URLs, or email addresses.
+              Tap to browse your files (CSV, Excel, Text)
             </div>
-            <div className="upload-formats">
+
+            <button 
+              className="btn btn-accent mobile-upload-btn"
+              onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}
+              style={{ marginTop: 16 }}
+            >
+              Browse Files
+            </button>
+
+            <div className="upload-formats" style={{ marginTop: 24 }}>
               {FORMAT_TAGS.map(f => <span key={f} className="format-tag">{f}</span>)}
             </div>
             <input

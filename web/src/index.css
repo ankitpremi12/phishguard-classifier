@@ -1223,6 +1223,19 @@ table tr:hover td { background: rgba(255,255,255,0.015); }
   font-size: 1.4rem; cursor: pointer; transition: all 0.2s;
 }
 .modal-close:hover { background: var(--bg-4); color: var(--text-1); }
+
+.section-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.source-badge { 
+  font-size: 0.6rem; 
+  padding: 3px 8px; 
+  border-radius: 4px; 
+  background: rgba(255,255,255,0.05); 
+  color: var(--text-3); 
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 /* ── Live Infrastructure Panel ── */
 .infra-panel { 
   padding: 24px; 

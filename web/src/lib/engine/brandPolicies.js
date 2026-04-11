@@ -2,6 +2,12 @@
 // Ported from the original Python classifier
 
 export const BRAND_TLD_POLICIES = {
+  hdfc: {
+    officialTlds: ['com', 'in'],
+    forbiddenTlds: ['org', 'net', 'xyz', 'top', 'click', 'pro', 'online', 'icu'],
+    brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
   sbi: {
     officialTlds: ['sbi'],
     forbiddenTlds: ['org', 'net', 'in', 'xyz', 'top', 'click', 'pro', 'tk', 'ml', 'cf', 'ga'],
@@ -138,6 +144,54 @@ export const BRAND_TLD_POLICIES = {
     officialTlds: ['in'],
     forbiddenTlds: ['com', 'org', 'online', 'live'],
     brandType: 'banking',
+    highRiskIfWrongTld: true,
+  },
+  apple: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['org', 'net', 'xyz', 'top', 'online', 'icu', 'site'],
+    brandType: 'tech',
+    highRiskIfWrongTld: true,
+  },
+  netflix: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['org', 'net', 'xyz', 'top', 'online', 'icu'],
+    brandType: 'entertainment',
+    highRiskIfWrongTld: true,
+  },
+  flipkart: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['in', 'org', 'net', 'xyz', 'top', 'online'],
+    brandType: 'ecommerce',
+    highRiskIfWrongTld: true,
+  },
+  phonepe: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['in', 'org', 'net', 'xyz', 'top', 'online'],
+    brandType: 'payment',
+    highRiskIfWrongTld: true,
+  },
+  paytm: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['in', 'org', 'net', 'xyz', 'top', 'online'],
+    brandType: 'payment',
+    highRiskIfWrongTld: true,
+  },
+  facebook: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['org', 'net', 'xyz', 'top', 'online', 'icu'],
+    brandType: 'social',
+    highRiskIfWrongTld: true,
+  },
+  instagram: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['org', 'net', 'xyz', 'top', 'online'],
+    brandType: 'social',
+    highRiskIfWrongTld: true,
+  },
+  whatsapp: {
+    officialTlds: ['com'],
+    forbiddenTlds: ['org', 'net', 'xyz', 'top', 'online', 'icu'],
+    brandType: 'messaging',
     highRiskIfWrongTld: true,
   },
 };

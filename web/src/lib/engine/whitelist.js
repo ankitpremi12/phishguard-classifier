@@ -2,6 +2,13 @@
 // ~750 verified Indian bank, government, and corporate domains
 
 const LEGITIMATE_DOMAINS = new Set([
+  // Major Global Platforms
+  'google.com','youtube.com','facebook.com','microsoft.com','apple.com',
+  'amazon.com','amazon.in','netflix.com','twitter.com','instagram.com',
+  'linkedin.com','paypal.com','stripe.com','github.com','stackoverflow.com',
+  'whatsapp.com','telegram.org','zoom.us','dropbox.com','spotify.com',
+  // Indian Banking — Primary Domains
+  'hdfc.com','hdfc.in','hdfcbank.com','hdfclife.com','hdfcergo.com',
   'axisbank.com','bandhanbank.com','cityunionbank.com','dcbbank.com','dhanbank.com',
   'hdfcbank.com','icicibank.com','indusind.com','idfcbank.com','jkbank.com',
   'karnatakabank.com','kotak.com','rblbank.com','southindianbank.com','idbi.com',

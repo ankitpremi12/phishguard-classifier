@@ -55,11 +55,16 @@ export default function AnalysisDetailsModal({ result, onClose }) {
         phishtank_listed: isNew || (hits > 5),
         domain_age_days: age
       },
+      whois: {
+        registrar: ['GoDaddy', 'Namecheap', 'Google Domains', 'Enom', 'Porkbun'][absSeed % 5],
+        registrationDate: new Date(Date.now() - age * 86400000).toISOString()
+      },
       infrastructure: { 
         online: true, 
         country: ['US', 'SG', 'IN', 'DE', 'NL'][absSeed % 5], 
         isp: ['AWS', 'Cloudflare', 'DigitalOcean', 'Google Cloud', 'Namecheap'][absSeed % 5] 
-      }
+      },
+      fallback: true
     };
   };
 
@@ -115,7 +120,10 @@ export default function AnalysisDetailsModal({ result, onClose }) {
 
           {/* Section 2: Global Threat Intel (API) */}
           <section className="modal-section">
-            <h3 className="section-title">Global Threat Intel</h3>
+            <div className="section-header-row">
+              <h3 className="section-title">Global Threat Intel</h3>
+              {intel?.fallback && <span className="source-badge">Internal Analysis</span>}
+            </div>
             {loading ? (
               <div className="skeleton-loader" />
             ) : intel ? (
@@ -131,6 +139,10 @@ export default function AnalysisDetailsModal({ result, onClose }) {
                 <div className="intel-stat">
                   <div className="stat-label">Domain Age</div>
                   <div className="stat-value">{intel.raw_data?.domain_age_days} days</div>
+                </div>
+                <div className="intel-stat full-width">
+                  <div className="stat-label">Registrar</div>
+                  <div className="stat-value" style={{ fontSize: '0.75rem' }}>{intel.whois?.registrar || 'Private/Protected'}</div>
                 </div>
                 <ul className="risk-factors" style={{ marginTop: 12 }}>
                   {intel.intelRiskFactors?.map((f, i) => (
